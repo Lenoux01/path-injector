@@ -43,6 +43,8 @@
     "@vscode/test-cli": "^0.0.9",
     "@vscode/test-electron": "^2.4.0"
   },
+  "license": "MIT",
+  "publisher": "hansenexus",
   "repository": {
     "type": "git",
     "url": "https://github.com/Lenoux01/path-injector.git"
