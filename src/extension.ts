@@ -1,21 +1,46 @@
+// Path: src/extension.ts
 import * as vscode from "vscode";
 import * as path from "path";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Extension activated");
 
-  let disposable = vscode.workspace.onDidSaveTextDocument(
-    async (document: vscode.TextDocument) => {
-      if (
-        !["plaintext", "javascript", "typescript", "python"].includes(
-          document.languageId
-        )
-      ) {
+  let disposable = vscode.workspace.onWillSaveTextDocument(
+    async (event: vscode.TextDocumentWillSaveEvent) => {
+      const document = event.document;
+      const supportedLanguages = [
+        "plaintext",
+        "javascript",
+        "typescript",
+        "python",
+        "typescriptreact",
+        "javascriptreact",
+        "prisma",
+        "csharp",
+        "java",
+        "cpp",
+        "c",
+        "go",
+        "ruby",
+        "php",
+        "swift",
+        "rust",
+        "kotlin",
+        "dart",
+        "html",
+        "css",
+        "scss",
+        "less",
+        "json",
+        "yaml",
+        "markdown",
+      ];
+
+      if (!supportedLanguages.includes(document.languageId)) {
         return;
       }
 
-      console.log("Supported file saved:", document.uri.fsPath);
-      console.log("File saved:", document.uri.fsPath);
+      console.log("Supported file about to be saved:", document.uri.fsPath);
 
       const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
       if (workspaceFolder) {
@@ -26,27 +51,32 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Relative path:", relativePath);
 
         const firstLine = document.lineAt(0);
-        if (!firstLine.text.startsWith("// Path:")) {
-          const edit = new vscode.WorkspaceEdit();
-          edit.insert(
-            document.uri,
-            new vscode.Position(0, 0),
+        const firstLineText = firstLine.text.trim();
+
+        let edit: vscode.TextEdit;
+
+        if (
+          firstLineText.startsWith("//") &&
+          !firstLineText.startsWith("// Path:")
+        ) {
+          // Remove the existing comment
+          edit = new vscode.TextEdit(
+            new vscode.Range(0, 0, 1, 0),
             `// Path: ${relativePath}\n`
           );
-
-          try {
-            const success = await vscode.workspace.applyEdit(edit);
-            if (success) {
-              console.log("Path inserted successfully");
-            } else {
-              console.log("Failed to insert path");
-            }
-          } catch (error) {
-            console.error("Error applying edit:", error);
-          }
+        } else if (!firstLineText.startsWith("// Path:")) {
+          // Insert the new path comment
+          edit = new vscode.TextEdit(
+            new vscode.Range(0, 0, 0, 0),
+            `// Path: ${relativePath}\n`
+          );
         } else {
           console.log("Path already exists at the top of the file");
+          return;
         }
+
+        event.waitUntil(Promise.resolve([edit]));
+        console.log("Path insertion or update queued");
       } else {
         console.log("File is not part of a workspace");
       }

@@ -1,8 +1,8 @@
 {
   "name": "path-injector",
-  "displayName": "path-injector",
-  "description": "Automatically insert the relative file path at the top of your documents. ",
-  "version": "1.0.0",
+  "displayName": "Path Injector",
+  "description": "Automatically insert the relative file path at the top of your documents.",
+  "version": "1.1.0",
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -10,17 +10,14 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:plaintext",
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:python"
+    "onLanguage"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "path-injector.helloWorld",
-        "title": "Hello World"
+        "command": "path-injector.insertPath",
+        "title": "Insert Path"
       }
     ]
   },

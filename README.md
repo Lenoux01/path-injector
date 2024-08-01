@@ -1,3 +1,13 @@
+# Path Injector
+
+Path Injector is a Visual Studio Code extension that automatically inserts the relative file path at the top of your documents.
+
+## Features
+
+- Automatically adds or updates a comment with the relative file path at the top of supported files.
+- Works with a wide range of programming and markup languages.
+- Removes existing comments at the top of the file that don't start with "// Path:".
+
 ## Configuration
 
 Currently, this extension works out of the box without any additional configuration.
@@ -5,17 +15,39 @@ Currently, this extension works out of the box without any additional configurat
 ## Supported Languages
 
 - Plaintext
-- JavaScript
-- TypeScript
+- JavaScript (including JSX)
+- TypeScript (including TSX)
 - Python
+- C#
+- Java
+- C++
+- C
+- Go
+- Ruby
+- PHP
+- Swift
+- Rust
+- Kotlin
+- Dart
+- HTML
+- CSS (including SCSS and Less)
+- JSON
+- YAML
+- Markdown
+- Prisma
 
-To add support for more languages, please open an issue or submit a pull request.
+To request support for additional languages, please open an issue or submit a pull request.
 
 ## Known Issues
 
-Please report any issues you encounter on the [GitHub issues page](https://github.com/your-username/path-injector/issues).
+Please report any issues you encounter on the [GitHub issues page](https://github.com/Lenoux01/path-injector/issues).
 
 ## Release Notes
+
+### 1.1.0
+
+- Added support for multiple new languages
+- Improved handling of existing comments
 
 ### 1.0.0
 
