@@ -2,8 +2,8 @@
   "name": "path-injector",
   "displayName": "Path Injector",
   "description": "Automatically insert the relative file path at the top of your documents.",
-  "version": "1.2.0",
-  "icon": "path-injector.png",
+  "version": "1.3.0",
+  "icon": "logo.png",
   "engines": {
     "vscode": "^1.91.0"
   },
@@ -15,6 +15,16 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Path Inserter",
+      "properties": {
+        "pathInserter.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable the Path Inserter extension"
+        }
+      }
+    },
     "commands": [
       {
         "command": "path-injector.insertPath",
