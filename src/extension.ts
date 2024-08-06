@@ -31,10 +31,36 @@ export function activate(context: vscode.ExtensionContext) {
         "css",
         "scss",
         "less",
-        "json",
-        "yaml",
-        "markdown",
       ];
+
+      const excludedExtensions = [
+        ".json",
+        ".md",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".gif",
+        ".svg",
+        ".config.js",
+        ".config.ts",
+        ".rc",
+        ".lock",
+        ".gitignore",
+        ".env",
+      ];
+
+      const fileName = path.basename(document.uri.fsPath);
+      const fileExtension = path.extname(document.uri.fsPath).toLowerCase();
+
+      // Check if the file should be excluded
+      if (
+        excludedExtensions.some(
+          (ext) => fileName.endsWith(ext) || fileExtension === ext
+        )
+      ) {
+        console.log("File excluded:", document.uri.fsPath);
+        return;
+      }
 
       if (!supportedLanguages.includes(document.languageId)) {
         return;
