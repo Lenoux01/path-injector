@@ -1,3 +1,4 @@
+// Path: src/fileHandler.ts
 import * as vscode from "vscode";
 import * as path from "path";
 import { isFileExcluded, isSupportedLanguage } from "./utils";
@@ -26,7 +27,7 @@ export async function handleWillSaveTextDocument(
     );
     console.log("Relative path:", relativePath);
 
-    const edit = createPathEdit(document, relativePath);
+    const edit = createOrUpdatePathEdit(document, relativePath);
     if (edit) {
       event.waitUntil(Promise.resolve([edit]));
       console.log("Path insertion or update queued");
@@ -36,25 +37,33 @@ export async function handleWillSaveTextDocument(
   }
 }
 
-function createPathEdit(
+function createOrUpdatePathEdit(
   document: vscode.TextDocument,
   relativePath: string
 ): vscode.TextEdit | undefined {
   const firstLine = document.lineAt(0);
   const firstLineText = firstLine.text.trim();
 
-  if (firstLineText.startsWith("//") && !firstLineText.startsWith("// Path:")) {
+  if (firstLineText.startsWith("// Path:")) {
+    const currentPath = firstLineText.substring("// Path:".length).trim();
+    if (currentPath !== relativePath) {
+      return new vscode.TextEdit(
+        new vscode.Range(0, 0, 1, 0),
+        `// Path: ${relativePath}\n`
+      );
+    } else {
+      console.log("Path is up to date");
+      return undefined;
+    }
+  } else if (firstLineText.startsWith("//")) {
     return new vscode.TextEdit(
       new vscode.Range(0, 0, 1, 0),
       `// Path: ${relativePath}\n`
     );
-  } else if (!firstLineText.startsWith("// Path:")) {
+  } else {
     return new vscode.TextEdit(
       new vscode.Range(0, 0, 0, 0),
       `// Path: ${relativePath}\n`
     );
-  } else {
-    console.log("Path already exists at the top of the file");
-    return undefined;
   }
 }
