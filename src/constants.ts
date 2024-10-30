@@ -1,3 +1,4 @@
+// Path: src/constants.ts
 export const SUPPORTED_LANGUAGES = [
   "c",
   "cpp",
@@ -21,6 +22,7 @@ export const SUPPORTED_LANGUAGES = [
   "swift",
   "typescript",
   "typescriptreact",
+  "vue"
 ];
 
 export const EXCLUDED_EXTENSIONS = [
@@ -35,10 +37,13 @@ export const EXCLUDED_EXTENSIONS = [
   ".json",
   ".lock",
   ".md",
+  ".mdx",
   ".png",
   ".rc",
   ".sh",
   ".svg",
   ".yaml",
   ".yml",
+  ".xml",
+  ".xml.dist",
 ];

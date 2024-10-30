@@ -1,3 +1,4 @@
+// Path: src/test/suite/fileHandler.test.ts
 import * as assert from "assert";
 import * as vscode from "vscode";
 import * as path from "path";
@@ -106,5 +107,53 @@ suite("File Handler Test Suite", () => {
     vscode.workspace.getWorkspaceFolder = originalGetWorkspaceFolder;
 
     assert.strictEqual(editsMade, undefined);
+  });
+
+  test("handleWillSaveTextDocument should handle Next.js directives correctly", async () => {
+    const document = {
+      uri: vscode.Uri.file("/workspace/test/component.tsx"),
+      languageId: "typescriptreact",
+      getText: () => "'use client'\nconsole.log('Hello');",
+      lineAt: (line: number) => {
+        if (line === 0) {
+          return { text: "'use client'" };
+        }
+        return { text: "console.log('Hello');" };
+      },
+    };
+
+    const workspaceFolder = {
+      uri: vscode.Uri.file("/workspace"),
+      name: "test",
+      index: 0,
+    };
+
+    // Mock vscode.workspace.getWorkspaceFolder
+    const originalGetWorkspaceFolder = vscode.workspace.getWorkspaceFolder;
+    vscode.workspace.getWorkspaceFolder = (uri: vscode.Uri) => workspaceFolder;
+
+    let editsMade: vscode.TextEdit[] | undefined;
+
+    const event = {
+      document: document as any,
+      waitUntil: (promise: Thenable<vscode.TextEdit[]>) => {
+        promise.then((edits) => {
+          editsMade = edits;
+        });
+      },
+    };
+
+    await handleWillSaveTextDocument(event as any);
+
+    // Restore original function
+    vscode.workspace.getWorkspaceFolder = originalGetWorkspaceFolder;
+
+    assert.strictEqual(editsMade?.length, 1);
+    assert.strictEqual(editsMade?.[0].newText, "// Path: test/component.tsx\n");
+  });
+
+  test("isSupportedLanguage should support PHP and Vue files", () => {
+    assert.strictEqual(isSupportedLanguage("php"), true);
+    assert.strictEqual(isSupportedLanguage("vue"), true);
   });
 });
