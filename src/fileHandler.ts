@@ -43,8 +43,15 @@ function createOrUpdatePathEdit(
 ): vscode.TextEdit | undefined {
   const firstLine = document.lineAt(0);
   const firstLineText = firstLine.text.trim();
-  const secondLine =
-    document.lineCount > 1 ? document.lineAt(1).text.trim() : "";
+
+  // Find all Path comments in the first few lines
+  let pathCommentLines: number[] = [];
+  for (let i = 0; i < Math.min(5, document.lineCount); i++) {
+    const line = document.lineAt(i).text.trim();
+    if (line.startsWith("// Path:")) {
+      pathCommentLines.push(i);
+    }
+  }
 
   // Handle Next.js directive cases
   const isUseClient =
@@ -53,8 +60,22 @@ function createOrUpdatePathEdit(
     firstLineText === "'use server'" || firstLineText === '"use server"';
   const hasNextDirective = isUseClient || isUseServer;
 
-  // If first line is a Next.js directive
+  // If there are multiple Path comments, we need to remove all but one
+  if (pathCommentLines.length > 1) {
+    // Create a composite edit that removes all Path comments
+    const edit = new vscode.TextEdit(
+      new vscode.Range(0, 0, Math.max(...pathCommentLines) + 1, 0),
+      hasNextDirective
+        ? `${firstLineText}\n// Path: ${relativePath}\n`
+        : `// Path: ${relativePath}\n`
+    );
+    return edit;
+  }
+
+  // Handle Next.js directive cases
   if (hasNextDirective) {
+    const secondLine =
+      document.lineCount > 1 ? document.lineAt(1).text.trim() : "";
     if (secondLine.startsWith("// Path:")) {
       const currentPath = secondLine.substring("// Path:".length).trim();
       if (currentPath !== relativePath) {
@@ -72,25 +93,8 @@ function createOrUpdatePathEdit(
     }
   }
 
-  // If first line is a Path comment and we need to add Next.js directive
+  // If first line is a Path comment
   if (firstLineText.startsWith("// Path:")) {
-    const nextLine = document.lineCount > 1 ? document.lineAt(1).text : "";
-    const hasNextDirectiveBelow =
-      nextLine.includes("'use client'") ||
-      nextLine.includes('"use client"') ||
-      nextLine.includes("'use server'") ||
-      nextLine.includes('"use server"');
-
-    if (hasNextDirectiveBelow) {
-      // Rearrange: Move directive to top and update path
-      const directive = nextLine.trim();
-      return new vscode.TextEdit(
-        new vscode.Range(0, 0, 2, 0),
-        `${directive}\n// Path: ${relativePath}\n`
-      );
-    }
-
-    // Just update path if needed
     const currentPath = firstLineText.substring("// Path:".length).trim();
     if (currentPath !== relativePath) {
       return new vscode.TextEdit(
@@ -99,14 +103,6 @@ function createOrUpdatePathEdit(
       );
     }
     return undefined;
-  }
-
-  // If first line starts with any comment
-  if (firstLineText.startsWith("//")) {
-    return new vscode.TextEdit(
-      new vscode.Range(0, 0, 1, 0),
-      `// Path: ${relativePath}\n`
-    );
   }
 
   // Default case: add path comment at the top

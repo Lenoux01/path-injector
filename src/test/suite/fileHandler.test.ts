@@ -156,4 +156,52 @@ suite("File Handler Test Suite", () => {
     assert.strictEqual(isSupportedLanguage("php"), true);
     assert.strictEqual(isSupportedLanguage("vue"), true);
   });
+
+  test("handleWillSaveTextDocument should remove duplicate Path comments", async () => {
+    const document = {
+      uri: vscode.Uri.file("/workspace/test/test.js"),
+      languageId: "javascript",
+      getText: () =>
+        '// Path: old/path\n// Path: another/path\nconsole.log("Hello");',
+      lineAt: (line: number) => {
+        if (line === 0) {
+          return { text: "// Path: old/path" };
+        }
+        if (line === 1) {
+          return { text: "// Path: another/path" };
+        }
+        return { text: 'console.log("Hello");' };
+      },
+      lineCount: 3,
+    };
+
+    const workspaceFolder = {
+      uri: vscode.Uri.file("/workspace"),
+      name: "test",
+      index: 0,
+    };
+
+    // Mock vscode.workspace.getWorkspaceFolder
+    const originalGetWorkspaceFolder = vscode.workspace.getWorkspaceFolder;
+    vscode.workspace.getWorkspaceFolder = (uri: vscode.Uri) => workspaceFolder;
+
+    let editsMade: vscode.TextEdit[] | undefined;
+
+    const event = {
+      document: document as any,
+      waitUntil: (promise: Thenable<vscode.TextEdit[]>) => {
+        promise.then((edits) => {
+          editsMade = edits;
+        });
+      },
+    };
+
+    await handleWillSaveTextDocument(event as any);
+
+    // Restore original function
+    vscode.workspace.getWorkspaceFolder = originalGetWorkspaceFolder;
+
+    assert.strictEqual(editsMade?.length, 1);
+    assert.strictEqual(editsMade?.[0].newText, "// Path: test/test.js\n");
+  });
 });

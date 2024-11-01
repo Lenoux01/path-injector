@@ -2,7 +2,7 @@
   "name": "path-injector",
   "displayName": "Path Injector",
   "description": "Automatically insert the relative file path at the top of your documents.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.91.0"
